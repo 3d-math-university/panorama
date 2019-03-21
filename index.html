@@ -1,0 +1,402 @@
+<html>
+	<head>
+		<style>
+			body{
+				margin: 0;
+			}
+			canvas{
+				width: 100%;
+				height: 100%
+			}
+		</style>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
+		
+	</head>
+	<body>
+		<script>
+			var info = `{
+				"2018_1206_104942_019.jpg" : {
+					"points":{
+						"0":{
+							"coords":[-30, -5, 60],
+							"next": "2018_1206_103734_002.jpg",
+							"longitude": 135.1
+						}
+						
+					}
+				},
+				
+				"2018_1206_103734_002.jpg" : {
+					"points":{
+						"0":{
+							"coords":[3, -5, 60],
+							"next": "2018_1206_103843_003.jpg",
+							"longitude": 138.5
+						},
+
+						"1":{
+							"coords":[50, -30, 45],
+							"next": "2018_1206_104942_019.jpg",
+							"longitude": 113.4
+						},
+
+						"2":{
+							"coords":[-85, -25, 13],
+							"next": "2018_1206_104545_008.jpg",
+							"longitude": 52
+						}						
+					}
+				},
+
+				"2018_1206_103843_003.jpg" : {
+					"points":{
+						"0":{
+							"coords":[-35, 0, 60],
+							"next": "2018_1206_103929_005.jpg",
+							"longitude": 31
+						},
+
+						"1":{
+							"coords":[-30, -30, 60],
+							"next": "2018_1206_103734_002.jpg",
+							"longitude": 135.1
+						}
+						
+					}
+				},
+
+				"2018_1206_103929_005.jpg" : {
+					"points":{
+						"0":{
+							"coords":[53, -20, 30],
+							"next": "2018_1206_104013_007.jpg",
+							"longitude": -5.3
+						},
+
+						"1":{
+							"coords":[15, -32, -70],
+							"next": "2018_1206_103734_002.jpg",
+							"longitude": 135.1
+						}
+						
+					}
+				},
+
+				"2018_1206_104013_007.jpg": {
+					"points":{
+						"0":{
+							"coords":[50, -18, -6],
+							"next": "2018_1206_104209_003.jpg",
+							"longitude": -2.4
+						},
+
+						"1":{
+							"coords":[-50, -18, 4],
+							"next": "2018_1206_103929_005.jpg",
+							"longitude": 281.6
+						}
+						
+					}
+				},
+
+				"2018_1206_104209_003.jpg": {
+					"points":{
+						"0":{
+							"coords":[50, -18, -3],
+							"next": "2018_1206_104332_004.jpg",
+							"longitude": 304.8
+						},
+
+						"1":{
+							"coords":[-50, -18, 0],
+							"next": "2018_1206_104013_007.jpg",
+							"longitude": 174.9
+						}
+						
+					}
+				},
+
+				"2018_1206_104332_004.jpg": {
+					"points":{
+						"0":{
+							"coords":[40, -25, -60],
+							"next": "2018_1206_104420_006.jpg",
+							"longitude": 4.2
+						},
+
+						"1":{
+							"coords":[-37, -25, 60],
+							"next": "2018_1206_104209_003.jpg",
+							"longitude": 179.9
+						}
+						
+					}
+				},
+
+				"2018_1206_104420_006.jpg": {
+					"points":{
+						"1":{
+							"coords":[-80, -25, -10],
+							"next": "2018_1206_104332_004.jpg",
+							"longitude": 121.9
+						}
+						
+					}
+				},
+
+				"2018_1206_104545_008.jpg": {
+					"points":{
+						"0":{
+							"coords":[58, -28, 60],
+							"next": "2018_1206_104620_010.jpg",
+							"longitude": 43.7
+						},
+
+						"1":{
+							"coords":[-53, -28, -60],
+							"next": "2018_1206_103734_002.jpg",
+							"longitude": 45.2
+						}
+						
+					}
+				},
+
+				"2018_1206_104620_010.jpg": {
+					"points":{
+						"0":{
+							"coords":[65, -28, 50],
+							"next": "2018_1206_104733_014.jpg",
+							"longitude": 51.6
+						},
+
+						"1":{
+							"coords":[-65, -28, -54],
+							"next": "2018_1206_104545_008.jpg",
+							"longitude": 226
+						}
+						
+					}
+				},
+
+				"2018_1206_104733_014.jpg": {
+					"points":{
+						"0":{
+							"coords":[58, -28, 60],
+							"next": "2018_1206_104832_018.jpg",
+							"longitude": 5.6
+						},
+
+						"1":{
+							"coords":[-53, -28, -60],
+							"next": "2018_1206_104620_010.jpg",
+							"longitude": 217.4
+						}
+						
+					}
+				},
+
+				"2018_1206_104832_018.jpg": {
+					"points":{
+						"0":{
+							"coords":[-65, -20, -4],
+							"next": "2018_1206_104733_014.jpg",
+							"longitude": 226.7
+						}
+						
+					}
+				}
+
+				
+				
+
+			}`
+			info = JSON.parse(info)
+		</script>
+		<script>
+			
+			var manualControl = false;
+			var longitude = 0;
+			var latitude = 0;
+			var savedX;
+			var savedY;
+			var savedLongitude;
+			var savedLatitude;
+			var raycaster = new THREE.Raycaster();
+			var mouseVector = new THREE.Vector3();
+			var onObject = false;
+			
+			function getIntersects( x, y ) {
+				x = ( x / window.innerWidth ) * 2 - 1;
+				y = - ( y / window.innerHeight ) * 2 + 1;
+				mouseVector.set( x, y, 0.5 );
+				raycaster.setFromCamera( mouseVector, camera );
+				return raycaster.intersectObject( group, true );
+			}
+
+			
+			// panoramas background
+			var nextPhoto = "2018_1206_103734_002.jpg";
+
+			// setting up the renderer
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+			
+			// creating a new scene
+			var scene = new THREE.Scene();
+			
+			// adding a camera
+			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+			camera.target = new THREE.Vector3(0, 0, 0);
+
+			// creation of a big sphere geometry
+			var sphere = new THREE.SphereGeometry(100, 100, 40);
+			sphere.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
+			
+			function showPanorama(nextPhoto){
+				// creation of the sphere material
+				var sphereMaterial = new THREE.MeshBasicMaterial();
+				sphereMaterial.map = THREE.ImageUtils.loadTexture(nextPhoto)
+
+				// geometry + material = mesh (actual object)
+				var sphereMesh = new THREE.Mesh(sphere, sphereMaterial);
+				scene.add(sphereMesh);
+
+				showArrows(nextPhoto);
+			}
+			group = new THREE.Group();
+			function showArrows(nextPhoto){
+				var spriteMap = new THREE.TextureLoader().load( 'arrow.png' );
+				
+				scene.remove(group);
+
+				group = new THREE.Group();
+				scene.add( group );
+				
+				var arrows = typeof(info[nextPhoto]) != 'undefined' ? info[nextPhoto]["points"] : [];
+				console.log(arrows)
+				for(var i in arrows){
+					if(info[nextPhoto]["points"][i].coords.length == 3){
+						var sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: spriteMap} ) );
+						sprite.position.set(...info[nextPhoto]["points"][i].coords);
+						sprite.scale.set( 8, 8, 8 );
+						sprite.next = info[nextPhoto]["points"][i].next;
+						sprite.longitude = info[nextPhoto]["points"][i].longitude;
+						group.add( sprite );
+					}
+				}
+			}
+
+			function cameraPoint(longitude){
+				camera.target.x = 500 * Math.cos(THREE.Math.degToRad(longitude));
+				camera.target.y = 500 * Math.cos(THREE.Math.degToRad(90));
+				camera.target.z = 500 * Math.sin(THREE.Math.degToRad(longitude));
+				
+				camera.lookAt(camera.target);
+			}
+
+			showPanorama(nextPhoto);
+
+			// listeners
+			document.addEventListener("mousedown", onDocumentMouseDown, false);
+			document.addEventListener("mousemove", onDocumentMouseMove, false);
+			document.addEventListener("mouseup", onDocumentMouseUp, false);
+			document.addEventListener("touchmove", onTouchMove, false);
+			document.addEventListener("touchstart", onTouch, false);
+			document.addEventListener("touchend", onNotTouch, false);
+
+				
+            render();
+            function render(){
+				
+				requestAnimationFrame(render);
+
+				// limiting latitude from -85 to 85 (cannot point to the sky or under your feet)
+                    latitude = Math.max(-85, Math.min(85, latitude));
+
+				// moving the camera according to current latitude (vertical movement) and longitude (horizontal movement)
+				cameraPoint(longitude)
+
+				// calling again render function
+				renderer.render(scene, camera);
+				
+			}
+			
+			// when the mouse is pressed, we switch to manual control and save current coordinates
+			function onDocumentMouseDown(event){
+
+				event.preventDefault();
+
+				var intersects = getIntersects( event.layerX, event.layerY );
+				if ( intersects.length > 0 && intersects.length != 'undefined') {
+					onObject = true;
+				}
+
+				manualControl = true;
+
+				savedX = event.clientX;
+				savedY = event.clientY;
+
+				savedLongitude = longitude;
+				savedLatitude = latitude;
+
+			}
+
+			// when the mouse moves, if in manual contro we adjust coordinates
+			function onDocumentMouseMove(event){
+
+				if(manualControl){
+					longitude = (savedX - event.clientX) * 0.1 + savedLongitude;
+					latitude = (event.clientY - savedY) * 0.1 + savedLatitude;
+				}
+
+			}
+			
+			
+
+			// when the mouse is released, we turn manual control off
+			function onDocumentMouseUp(event){
+				if(onObject == true){
+					var intersects = getIntersects( event.layerX, event.layerY );
+					if ( intersects.length > 0 ) {
+
+						nextPhoto = intersects[0].object.next;
+						longitude = intersects[0].object.longitude;
+						showPanorama(nextPhoto);
+					}
+					onObject = false;
+				}
+				manualControl = false;
+
+			}
+
+			function onNotTouch(event){
+				manualControl = false;
+			}
+
+			function onTouch(evt) {
+				event.preventDefault();
+				var touches = evt.changedTouches;
+				manualControl = true;
+
+				savedX = touches[0].clientX;
+				savedY = touches[0].clientY;
+
+				savedLongitude = longitude;
+				savedLatitude = latitude;
+				
+			}
+
+			function onTouchMove(evt) {
+				evt.preventDefault();
+				var touches = evt.changedTouches;
+						
+				if(manualControl){
+					longitude = (savedX - touches[0].clientX) * 0.1 + savedLongitude;
+					latitude = (touches[0].clientY - savedY) * 0.1 + savedLatitude;
+				}
+				
+			}
+		</script>
+	</body>
+</html>
